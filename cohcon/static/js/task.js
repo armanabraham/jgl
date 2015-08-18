@@ -1,223 +1,141 @@
-/*
- * Requires:
- *     psiturk.js
- *     utils.js
- */
-
-// Initalize psiturk object
-var psiTurk = new PsiTurk(uniqueId, adServerLoc, mode);
-
-var mycondition = condition;  // these two variables are passed by the psiturk server process
-var mycounterbalance = counterbalance;  // they tell you which condition you have been assigned to
-// they are not used in the stroop code but may be useful to you
-
-// All pages to be loaded
-var pages = [
-	"instructions/instruct-1.html",
-	"instructions/instruct-2.html",
-	"instructions/instruct-3.html",
-	"instructions/instruct-ready.html",
-	"stage.html",
-	"postquestionnaire.html"
-];
-
-psiTurk.preloadPages(pages);
-
-var instructionPages = [ // add as a list as many pages as you like
-	"instructions/instruct-1.html",
-	"instructions/instruct-2.html",
-	"instructions/instruct-3.html",
-	"instructions/instruct-ready.html"
-];
-
-
-/********************
-* HTML manipulation
-*
-* All HTML files in the templates directory are requested 
-* from the server when the PsiTurk object is created above. We
-* need code to get those pages from the PsiTurk object and 
-* insert them into the document.
-*
-********************/
-
-/********************
-* STROOP TEST       *
-********************/
-var StroopExperiment = function() {
-
-	var wordon, // time word is presented
-	    listening = false;
-
-	// Stimuli for a basic Stroop experiment
-	var stims = [
-			["SHIP", "red", "unrelated"],
-			["MONKEY", "green", "unrelated"],
-			["ZAMBONI", "blue", "unrelated"],
-			["RED", "red", "congruent"],
-			["GREEN", "green", "congruent"],
-			["BLUE", "blue", "congruent"],
-			["GREEN", "red", "incongruent"],
-			["BLUE", "green", "incongruent"],
-			["RED", "blue", "incongruent"]
-		];
-
-	stims = _.shuffle(stims);
-
-	var next = function() {
-		if (stims.length===0) {
-			finish();
-		}
-		else {
-			stim = stims.shift();
-			show_word( stim[0], stim[1] );
-			wordon = new Date().getTime();
-			listening = true;
-			d3.select("#query").html('<p id="prompt">Type "R" for Red, "B" for blue, "G" for green.</p>');
-		}
-	};
-	
-	var response_handler = function(e) {
-		if (!listening) return;
-
-		var keyCode = e.keyCode,
-			response;
-
-		switch (keyCode) {
-			case 82:
-				// "R"
-				response="red";
-				break;
-			case 71:
-				// "G"
-				response="green";
-				break;
-			case 66:
-				// "B"
-				response="blue";
-				break;
-			default:
-				response = "";
-				break;
-		}
-		if (response.length>0) {
-			listening = false;
-			var hit = response == stim[1];
-			var rt = new Date().getTime() - wordon;
-
-			psiTurk.recordTrialData({'phase':"TEST",
-                                     'word':stim[0],
-                                     'color':stim[1],
-                                     'relation':stim[2],
-                                     'response':response,
-                                     'hit':hit,
-                                     'rt':rt}
-                                   );
-			remove_word();
-			next();
-		}
-	};
-
-	var finish = function() {
-	    $("body").unbind("keydown", response_handler); // Unbind keys
-	    currentview = new Questionnaire();
-	};
-	
-	var show_word = function(text, color) {
-		d3.select("#stim")
-			.append("div")
-			.attr("id","word")
-			.style("color",color)
-			.style("text-align","center")
-			.style("font-size","150px")
-			.style("font-weight","400")
-			.style("margin","20px")
-			.text(text);
-	};
-
-	var remove_word = function() {
-		d3.select("#word").remove();
-	};
-
-	
-	// Load the stage.html snippet into the body of the page
-	psiTurk.showPage('stage.html');
-
-	// Register the response handler that is defined above to handle any
-	// key down events.
-	$("body").focus().keydown(response_handler); 
-
-	// Start the test
-	next();
-};
-
-
-/****************
-* Questionnaire *
-****************/
-
-var Questionnaire = function() {
-
-	var error_message = "<h1>Oops!</h1><p>Something went wrong submitting your HIT. This might happen if you lose your internet connection. Press the button to resubmit.</p><button id='resubmit'>Resubmit</button>";
-
-	record_responses = function() {
-
-		psiTurk.recordTrialData({'phase':'postquestionnaire', 'status':'submit'});
-
-		$('textarea').each( function(i, val) {
-			psiTurk.recordUnstructuredData(this.id, this.value);
-		});
-		$('select').each( function(i, val) {
-			psiTurk.recordUnstructuredData(this.id, this.value);		
-		});
-
-	};
-
-	prompt_resubmit = function() {
-		replaceBody(error_message);
-		$("#resubmit").click(resubmit);
-	};
-
-	resubmit = function() {
-		replaceBody("<h1>Trying to resubmit...</h1>");
-		reprompt = setTimeout(prompt_resubmit, 10000);
-		
-		psiTurk.saveData({
-			success: function() {
-			    clearInterval(reprompt); 
-                psiTurk.computeBonus('compute_bonus', function(){finish()}); 
-			}, 
-			error: prompt_resubmit
-		});
-	};
-
-	// Load the questionnaire snippet 
-	psiTurk.showPage('postquestionnaire.html');
-	psiTurk.recordTrialData({'phase':'postquestionnaire', 'status':'begin'});
-	
-	$("#next").click(function () {
-	    record_responses();
-	    psiTurk.saveData({
-            success: function(){
-                psiTurk.computeBonus('compute_bonus', function() { 
-                	psiTurk.completeHIT(); // when finished saving compute bonus, the quit
-                }); 
-            }, 
-            error: prompt_resubmit});
-	});
-    
-	
-};
-
-// Task object to keep track of the current phase
-var currentview;
-
-/*******************
- * Run Task
- ******************/
-$(window).load( function(){
-    psiTurk.doInstructions(
-    	instructionPages, // a list of pages you want to display in sequence
-    	function() { currentview = new StroopExperiment(); } // what you want to do when you are done with instructions
-    );
+$(document).ready(function() {
+	cohcon();
 });
+
+function cohcon() {
+
+  	window.myscreen = initScreen();
+
+	var instructionPages = [ // add as a list as many pages as you like
+		"instructions/instruct-1.html",
+		"instructions/instruct-2.html",
+		"instructions/instruct-ready.html"
+	];
+
+	window.task = [];
+	task[0] = [];
+	task[0][0] = initSurvey();
+	task[0][0].html = "survey.html";
+
+	task[0][1] = initInstructions(instructionPages);
+
+	task[0][2] = {};
+	task[0][2].waitForBacktick = 0;
+	task[0][2].seglen = [0.5,0.25,3];
+	task[0][2].numTrials = 5;
+	task[0][2].parameter = {};
+	task[0][2].parameter.practice = 1;
+	task[0][2].parameter.cuedTask = 'contrast';
+	task[0][2].parameter.miscuedTask = 'coherence';
+	task[0][2].parameter.contrast = [.1, .5, .9];
+	task[0][2].parameter.coherence = [.1, .2, .4];
+	task[0][2].usingScreen = 1;
+	task[0][2].html = "canvas.html";
+
+	task[0][3] = initSurvey();
+	task[0][3].html = "postsample.html";
+
+	task[0][4] = initSurvey();
+	task[0][4].html = "preExp.html";
+
+	task[0][5] = {};
+	task[0][5].seglen = [0.5,0.25,1];
+	task[0][5].numTrials = 100;
+	task[0][5].parameter = {};
+	task[0][5].parameter.practice = 0;
+	task[0][5].parameter.cuedTask = 'coherence';
+	task[0][5].parameter.miscuedTask = 'contrast';
+	task[0][5].parameter.contrast = [.1, .5, .9];
+	task[0][5].parameter.coherence = [.1, .2, .4];
+	task[0][5].usingScreen = 1;
+	task[0][5].html = "canvas.html";
+
+	task[0][6] = initSurvey();
+	task[0][6].html = "postquestionnaire-1.html";
+
+	task[0][7] = initSurvey();
+	task[0][7].html = "postquestionnaire-2.html";
+
+
+	task[0][2] = initTask(task[0][2], startSegmentCallback, screenUpdateCallback);
+	task[0][5] = initTask(task[0][5], startSegmentCallback, screenUpdateCallback, undefined, startTrialCallback, endTrialCallback);
+
+	window.stimulus = {};
+	initStimulus('stimulus');
+
+	myInitStimulus();
+
+	initTurk();
+
+	startPhase(task[0]);
+
+}
+
+var startTrialCallback = function(task, myscreen) {
+
+  return [task, myscreen];
+}
+
+var endTrialCallback = function(task, myscreen) {
+
+  return [task, myscreen];
+}
+
+var startSegmentCallback = function(task, myscreen) {
+
+  return [task, myscreen];
+}
+
+var screenUpdateCallback = function(task, myscreen) {
+
+	jglClearScreen(128);
+
+	jglFixationCross(1,2,'#ff0000',[0,0]);
+
+	//jglLines2([0], [15], [0], [-15], 0.02, "#00ff00");
+	//jglPoints2(stimulus.dots.blue.x, stimulus.dots.blue.y, stimulus.dots.blue.r, stimulus.dots.blue.color);
+	//jglPoints2(stimulus.dots.red.x, stimulus.dots.red.y, stimulus.dots.red.r, stimulus.dots.red.color);
+
+	return [task, myscreen];
+
+}
+
+function myInitStimulus() {
+
+	stimulus.low = {}; stimulus.med = {}; stimulus.high = {};
+	stimulus.low.contrast = 0.1;
+	stimulus.low.coherence = 0.1;
+	stimulus.med.contrast = 0.5;
+	stimulus.med.coherence = 0.25;
+	stimulus.high.contrast = 0.9;
+	stimulus.high.coherence = 0.4;
+
+	stimulus.mask = {};
+	stimulus.mask.x = {}; stimulus.mask.y = {};
+	stimulus.mask.color = {};
+	stimulus.mask.x.min = -10;
+	stimulus.mask.x.max = 10;
+	stimulus.mask.y.min = -8;
+	stimulus.mask.y.max = 8;
+	stimulus.mask.color.A = '#ffffff';
+	stimulus.mask.color.B = '#111111';
+	stimulus.mask.blocksize = 0.5;
+	
+	stimulus.dots = {};
+	stimulus.dots.color = ['#ffffff','#111111'];
+	stimulus.dots.n = 100;
+	stimulus.dots.group = [zeros]
+	stimulus.dots.x = [];
+	stimulus.dots.y = [];
+}
+
+function genXArray(length) {
+	var negs = lessThan(rand(task[0][0], length), 0.5);
+
+	var values = add(multiply(rand(task[0][0], length), stimulus.dots.xrange - stimulus.dots.lineBuf), stimulus.dots.lineBuf);
+
+	values = change(values, multiply(index(values, negs, true), -1), negs);
+
+	return values;
+
+}
