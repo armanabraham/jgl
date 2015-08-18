@@ -5,10 +5,10 @@ amt_keywords = Perception, Psychology
 lifetime = 2
 us_only = true
 approve_requirement = 95
-contact_email_on_error = heegerlabmturk@gmail.com
+contact_email_on_error = gruturk@gmail.com
 ad_group = Heeger lab experiment
 psiturk_keywords = perception
-organization_name = New York University
+organization_name = Stanford University
 browser_exclude_rule = MSIE, mobile, tablet
 
 [Database Parameters]
@@ -17,7 +17,7 @@ table_name = gorillaReal
 
 [Server Parameters]
 host = 0.0.0.0
-port = 5000
+port = 5001
 cutoff_time = 30
 logfile = server.log
 loglevel = 2
