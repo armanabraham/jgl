@@ -5,3 +5,5 @@ cohcon/.psiturk_history
 *.log
 
 cohcon/.psiturk_history
+
+*.csv
