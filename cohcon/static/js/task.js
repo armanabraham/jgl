@@ -21,7 +21,7 @@ function cohcon() {
 
 	task[0][2] = {};
 	task[0][2].waitForBacktick = 0;
-	task[0][2].segmin = [0.5,0.05,0.5,3];
+	task[0][2].segmin = [0.5,0.025,0.5,3];
 	task[0][2].segmax = [0.5,0.2,0.5,3];
 	task[0][2].numTrials = 5;
 	task[0][2].parameter = {};
@@ -32,56 +32,69 @@ function cohcon() {
 	task[0][2].parameter.cohP = [0.1];
 	task[0][2].parameter.cohInc = [0.3];
 	task[0][2].parameter.cohSide = [1, 2];
-	task[0][2].parameter.task = 2;
+	task[0][2].parameter.dir = [-1,1];
+	task[0][2].parameter.task = 1;
 	task[0][2].usingScreen = 1;
 	task[0][2].getResponse = [0,0,0,1];
 	task[0][2].html = "canvas.html";
 
 	task[0][3] = initSurvey();
-	task[0][3].html = "response.html";
+	task[0][3].html = "preExp.html";
 
-	task[0][4] = initSurvey();
-	task[0][4].html = "preExp.html";
+	task[0][4] = {};
+	task[0][4].segmin = [0.5,0.025,0.5,2];
+	task[0][4].segmax = [0.5,0.2,0.5,2];
+	task[0][4].numTrials = 100;
+	task[0][4].parameter = {};
+	task[0][4].parameter.practice = 0;
+	task[0][4].parameter.practice = 1;
+	task[0][4].parameter.conP = 0.6;
+	task[0][4].parameter.conInc = [0.1];
+	task[0][4].parameter.conSide = [1, 2];
+	task[0][4].parameter.dir = [-1,1];
+	task[0][4].parameter.cohP = [0.1];
+	task[0][4].parameter.cohInc = [0.3];
+	task[0][4].parameter.cohSide = [1, 2];
+	task[0][4].parameter.task = 1;
+	task[0][4].usingScreen = 1;
+	task[0][4].getResponse = [0,0,0,1];
+	task[0][4].html = "canvas.html";
 
-	task[0][5] = {};
-	task[0][5].segmin = [0.5,0.05,0.5,3];
-	task[0][5].segmax = [0.5,0.2,0.5,3];
-	task[0][5].numTrials = 100;
-	task[0][5].parameter = {};
-	task[0][5].parameter.practice = 0;
-	task[0][5].parameter.practice = 1;
-	task[0][5].parameter.conP = 0.6;
-	task[0][5].parameter.conInc = [0.1];
-	task[0][5].parameter.conSide = [1, 2];
-	task[0][5].parameter.cohP = [0.1];
-	task[0][5].parameter.cohInc = [0.3];
-	task[0][5].parameter.cohSide = [1, 2];
-	task[0][5].usingScreen = 1;
-	task[0][5].getResponse = [0,0,0,1];
-	task[0][5].html = "canvas.html";
+	task[0][5] = initSurvey();
+	task[0][5].html = "postquestionnaire-1.html";
 
 	task[0][6] = initSurvey();
-	task[0][6].html = "postquestionnaire-1.html";
-
-	task[0][7] = initSurvey();
-	task[0][7].html = "postquestionnaire-2.html";
+	task[0][6].html = "postquestionnaire-2.html";
 
 
-	task[0][2] = initTask(task[0][2], startSegmentCallback, screenUpdateCallback, [], startTrialCallback);
-	task[0][5] = initTask(task[0][5], startSegmentCallback, screenUpdateCallback, getResponseCallback, startTrialCallback, endTrialCallback);
+	task[0][2] = initTask(task[0][2], startSegmentCallback, screenUpdateCallback, getResponseCallback, startTrialCallback);
+	task[0][4] = initTask(task[0][4], startSegmentCallback, screenUpdateCallback, getResponseCallback, startTrialCallback);
 
 	window.stimulus = {};
 	initStimulus('stimulus');
 
+
 	myInitStimulus(task);
 
 	initTurk();
+
+	jglData.responses = [];
+	jglData.correct = [];
 
 	startPhase(task[0]);
 
 }
 
 var startTrialCallback = function(task, myscreen) {
+	if (task.trialnum >= stimulus.critTrial) {
+		task.thistrial.task = 2;
+	}
+	if(task.trialnum == stimulus.critTrial) {
+		task.thistrial.seglen[stimulus.seg.resp] = 10;
+	}
+	jglData.responses.push(0);
+	jglData.correct.push(0);
+	stimulus.gotResp = false;
 	// contrast
 	var lCon, rCon;
 	if (task.thistrial.conSide==1) {
@@ -115,12 +128,25 @@ var startTrialCallback = function(task, myscreen) {
   return [task, myscreen];
 }
 
-var endTrialCallback = function(task, myscreen) {
-
-  return [task, myscreen];
-}
-
 var getResponseCallback = function(task, myscreen) {
+	switch (jglData.keys[jglData.keys.length-1].keyCode) {
+		case 68:
+			var resp = 2;
+			break;
+		case 65:
+			var resp = 1;
+			break;
+		default:
+			console.log('response not recognized');
+	}
+	if (task.thistrial.task==2) {
+		// contrast
+		stimulus.gotResp = task.thistrial.conSide == resp ? 1 : -1; 
+	} else {
+		stimulus.gotResp = task.thistrial.cohSide == resp ? 1 : -1; 
+	}
+	jglData.responses[task.trialnum] = resp;
+	jglData.correct[task.trialnum] = stimulus.gotResp;
 	return [task, myscreen];
 }
 
@@ -147,8 +173,14 @@ var screenUpdateCallback = function(task, myscreen) {
 			upFix('#000000');
 			break;
 		case stimulus.seg.resp:
-			upExamples(task);
-			upFix('#ffffff');
+			if (stimulus.gotResp==0) {
+				upExamples(task);
+				upFix('#ffffff');
+			} else if (stimulus.gotResp==1) {
+				upFix('#00ff00');
+			} else {
+				upFix('#ff0000');
+			}
 			break;
 		default:
 			AssertException('screenUpdate failed. Segment does not exist');
@@ -159,16 +191,43 @@ var screenUpdateCallback = function(task, myscreen) {
 }
 
 function upExamples(task) {
+	jglTextSet('Arial',1,'#000000',0,0);
+	if (task.trialnum == stimulus.critTrial) {
+		jglTextDraw('Respond about Contrast!!', -5, -5);
+		jglTextDraw('You have extra time.', -5, -4);
+	}
 	if (task.thistrial.task==2) {
 		// Contrast examples
-		for (i=0;i<4;i++) {
+		for (var i=0;i<4;i++) {
 			// blt each example one at a time
-			jglPoints2(index(stimulus.eDotsC.x[i],stimulus.eDotsC.con,true),index(stimulus.eDotsC.y,stimulus.eDotsC.con,true), 0.2, stimulus.eDotsC.colorB);
-			jglPoints2(index(stimulus.eDotsC.x[i],not(stimulus.eDotsC.con),true),index(stimulus.eDotsC.y,not(stimulus.eDotsC.con),true), 0.2, stimulus.eDotsC.colorW);
+			jglPoints2(index(stimulus.eDotsC.x[i],stimulus.eDotsC.con,true),index(stimulus.eDotsC.y[i],stimulus.eDotsC.con,true), 0.2, stimulus.eDotsC.colorB[i]);
+			jglPoints2(index(stimulus.eDotsC.x[i],not(stimulus.eDotsC.con),true),index(stimulus.eDotsC.y[i],not(stimulus.eDotsC.con),true), 0.2, stimulus.eDotsC.colorW[i]);
 		}
 	} else {
-		// coherence examples (Todo)
+		// coherence examples 
+		for (var i=0;i<4;i++) {
+			// blt each example one at a time
+			if (stimulus.eDotsM.dir[i]!=0) {
+				stimulus.eDotsM.x[i] = add(stimulus.eDotsM.x[i],freq_factor/2*stimulus.eDotsM.dir[i]*task.thistrial.dir);
+				for (var j=0;j<stimulus.eDotsM.x[i].length;j++) {
+					if (stimulus.eDotsM.x[i][j] > stimulus.eDotsM.maxX[i]) {
+						stimulus.eDotsM.x[i][j] = stimulus.eDotsM.x[i][j] - (stimulus.eDotsM.maxX[i] - stimulus.eDotsM.minX[i]);
+					} else if (stimulus.eDotsM.x[i][j] < stimulus.eDotsM.minX[i]) {
+						stimulus.eDotsM.x[i][j] = stimulus.eDotsM.x[i][j] + (stimulus.eDotsM.maxX[i] - stimulus.eDotsM.minX[i])
+					}
+					if (stimulus.eDotsM.y[i][j] > stimulus.eDotsM.maxY[i]) {
+						stimulus.eDotsM.y[i][j] = stimulus.eDotsM.y[i][j] - (stimulus.eDotsM.maxY[i] - stimulus.eDotsM.minY[i]);
+					} else if (stimulus.eDotsM.y[i][j] < stimulus.eDotsM.minY[i]) {
+						stimulus.eDotsM.y[i][j] = stimulus.eDotsM.y[i][j] + (stimulus.eDotsM.maxY[i] - stimulus.eDotsM.minY[i])
+					}
+				}
+			}
+			jglPoints2(index(stimulus.eDotsM.x[i],stimulus.eDotsM.con,true),index(stimulus.eDotsM.y[i],stimulus.eDotsM.con,true), 0.2, '#000000');
+			jglPoints2(index(stimulus.eDotsM.x[i],not(stimulus.eDotsM.con),true),index(stimulus.eDotsM.y[i],not(stimulus.eDotsM.con),true), 0.2, '#ffffff');
+		}
 	}
+	jglTextDraw('D',-0.45,-2.75);
+	jglTextDraw('A',-0.35,2.9);
 }
 
 function upMask() {
@@ -210,20 +269,20 @@ function updateDots(task,dots) {
 	freq_factor = 0.1;
 
 	// Move coherent dots
-	dots.X = add(dots.X,dots.dir*freq_factor,dots.coherent);
+	dots.X = add(dots.X,task.thistrial.dir*freq_factor,dots.coherent);
 
 	// Code below is an attempt to copy my incoherent dot motion matlab code
-	xmat = repmat([1,1,-1,-1],dots.incoherentn+4-(dots.incoherentn % 4));
-	ymat = repmat([1,-1,1,-1],dots.incoherentn+4-(dots.incoherentn % 4));
-	perms = randPerm(task,dots.incoherentn);
+	// var xmat = repmat([1,1,-1,-1],dots.incoherentn+4-(dots.incoherentn % 4));
+	// var ymat = repmat([1,-1,1,-1],dots.incoherentn+4-(dots.incoherentn % 4));
+	// var perms = randPerm(task,dots.incoherentn);
 
 	// Build incoherence
-	dots.yD = zeros(dots.n);
-	dots.xD = zeros(dots.n);
+	// dots.yD = zeros(dots.n);
+	// dots.xD = zeros(dots.n);
 
 	// Move incoherent dots
-	dots.Y = add(dots.Y,dots.yD,dots.incoherent);
-	dots.X = add(dots.X,dots.yD,dots.incoherent);
+	// dots.Y = add(dots.Y,dots.yD,dots.incoherent);
+	// dots.X = add(dots.X,dots.yD,dots.incoherent);
 
 	// Flip dots back if they go too far
 	for (var i=0;i<dots.X.length;i++) {
@@ -247,6 +306,7 @@ function updateDots(task,dots) {
 }
 
 function myInitStimulus(task) {
+	stimulus.critTrial = 5;
 
 	stimulus.seg = {};
 	stimulus.seg.ITI = 0;
@@ -305,7 +365,6 @@ function myInitStimulus(task) {
 	stimulus.dotsL.maxX = 7;
 	stimulus.dotsL.minY= -5;
 	stimulus.dotsL.maxY = 5;
-	stimulus.dotsL.dir = 1;
 	stimulus.dotsL.n = 100;
 	stimulus.dotsL.con = sortIndices(repmat([0,1],stimulus.dotsL.n/2),randPerm(task,stimulus.dotsL.n));
 	stimulus.dotsL.group = []
@@ -321,7 +380,6 @@ function myInitStimulus(task) {
 	stimulus.dotsR.maxX = 7;
 	stimulus.dotsR.minY= -5;
 	stimulus.dotsR.maxY = 5;
-	stimulus.dotsR.dir = 1;
 	stimulus.dotsR.n = 100;
 	stimulus.dotsR.con = sortIndices(repmat([0,1],stimulus.dotsL.n/2),randPerm(task,stimulus.dotsR.n));
 	stimulus.dotsR.group = []
@@ -334,33 +392,36 @@ function myInitStimulus(task) {
 
 	// example dots for contrast, static
 	stimulus.eDotsC = {};
-	stimulus.eDotsC.n = 10;
-	stimulus.eDotsC.minX = [-10, 6, -10, 6];
-	stimulus.eDotsC.maxX = [-6, 10, -6, 10];
-	stimulus.eDotsC.minY = [2, 2, -5, -5];
-	stimulus.eDotsC.maxY = [5, 5, -2, -2];
+	stimulus.eDotsC.n = 25;
+	stimulus.eDotsC.minX = [-4, 2, -4, 2];
+	stimulus.eDotsC.maxX = [-2, 4, -2, 4];
+	stimulus.eDotsC.minY = [2, 2, -4, -4];
+	stimulus.eDotsC.maxY = [4, 4, -2, -2];
 	stimulus.eDotsC.con = sortIndices(repmat([0,1],stimulus.eDotsC.n/2),randPerm(task,stimulus.eDotsC.n));
 	stimulus.eDotsC.colorW = [con2hex(1),con2hex(0.6),con2hex(0.6),con2hex(1)];
 	stimulus.eDotsC.colorB = [con2hex(0),con2hex(0.4),con2hex(0.4),con2hex(0)];
 	stimulus.eDotsC.x = []; stimulus.eDotsC.y = [];
 	for (var i=0;i<4;i++) {
-		xs = add(multiply(rand(task,stimulus.eDotsC.n),stimulus.eDotsC.maxX[i]-stimulus.eDotsC.maxX[i]),stimulus.eDotsC.minX[i]);
-		ys = add(multiply(rand(task,stimulus.eDotsC.n),stimulus.eDotsC.maxY[i]-stimulus.eDotsC.maxY[i]),stimulus.eDotsC.minY[i]);
+		xs = add(multiply(rand(task,stimulus.eDotsC.n),stimulus.eDotsC.maxX[i]-stimulus.eDotsC.minX[i]),stimulus.eDotsC.minX[i]);
+		ys = add(multiply(rand(task,stimulus.eDotsC.n),stimulus.eDotsC.maxY[i]-stimulus.eDotsC.minY[i]),stimulus.eDotsC.minY[i]);
 		stimulus.eDotsC.x.push(xs);
 		stimulus.eDotsC.y.push(ys);
 	}
 
 	// example dots for motion, two static, two moving
 	stimulus.eDotsM = {};
-}
-
-function genXArray(length) {
-	var negs = lessThan(rand(task[0][0], length), 0.5);
-
-	var values = add(multiply(rand(task[0][0], length), stimulus.dots.xrange - stimulus.dots.lineBuf), stimulus.dots.lineBuf);
-
-	values = change(values, multiply(index(values, negs, true), -1), negs);
-
-	return values;
-
+	stimulus.eDotsM.n = 25;
+	stimulus.eDotsM.minX = [-4, 2, -4, 2];
+	stimulus.eDotsM.maxX = [-2, 4, -2, 4];
+	stimulus.eDotsM.minY = [2, 2, -4, -4];
+	stimulus.eDotsM.maxY = [4, 4, -2, -2];
+	stimulus.eDotsM.dir = [-1,0,0,1];
+	stimulus.eDotsM.con = sortIndices(repmat([0,1],stimulus.eDotsM.n/2),randPerm(task,stimulus.eDotsM.n));
+	stimulus.eDotsM.x = []; stimulus.eDotsM.y = [];
+	for (var i=0;i<4;i++) {
+		xs = add(multiply(rand(task,stimulus.eDotsM.n),stimulus.eDotsM.maxX[i]-stimulus.eDotsM.minX[i]),stimulus.eDotsC.minX[i]);
+		ys = add(multiply(rand(task,stimulus.eDotsM.n),stimulus.eDotsM.maxY[i]-stimulus.eDotsM.minY[i]),stimulus.eDotsC.minY[i]);
+		stimulus.eDotsM.x.push(xs);
+		stimulus.eDotsM.y.push(ys);
+	}
 }

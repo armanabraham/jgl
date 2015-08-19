@@ -20,11 +20,10 @@ function boolpercent(arr) {
 }
 
 sortIndices = function (array,indices) {
-    var i = array.length,
-    ret = zeros(array.length);
+    var ret = zeros(array.length);
 
-    while (i--) {
-        ret[i-1] = array[indices[i-1]];
+    for (var i=0;i<array.length;i++) {
+        ret[i] = array[indices[i]];
     }
     return(ret);
 }
