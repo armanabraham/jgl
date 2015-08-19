@@ -7,3 +7,5 @@ cohcon/.psiturk_history
 cohcon/.psiturk_history
 
 *.csv
+
+*.log
