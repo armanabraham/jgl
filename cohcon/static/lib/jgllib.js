@@ -100,7 +100,7 @@ function Canvas() {
 	this.usingVisualAnglesStencil = false; // Is the stencil using visualAngles?
 	this.backgroundColor = "#ffffff";
 	this.lastFlushTime = 0;
-	this.frameRate = 60;
+	this.frameRate = 30;
 	this.isOpen = false;
 }
 
@@ -369,7 +369,7 @@ function numToHex(number) {
  * Function for drawing 2D points.
  * @param {Array} x array of x coordinates
  * @param {Array} y array of y coordinates
- * @param {Number} size Size of point in pixels(diameter)
+ * @param {Number} size Size of point in degrees (diameter)
  * @param {String} color Color of points in #hex format
  */
 function jglPoints2(x, y, size, color) {
@@ -792,6 +792,14 @@ function jglMakeArray(low, step, high) {
 	return [low];
 }
 
+function repmat(array,reps) {
+	out = [];
+	for (i=0;i<reps;i++) {
+		out = out.concat(array);
+	}
+	return(out);
+}
+
 /**
  * Function for generating jgl textures.
  * This function does different things depending on
@@ -1008,6 +1016,3 @@ function jglGetParam(str) {
 function jglSetParam(param, val) {
 	eval("canvas." + param + " = " + val);
 }
-
-
-

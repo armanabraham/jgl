@@ -18,3 +18,20 @@ function boolpercent(arr) {
 	}
 	return 100* count / arr.length;
 }
+
+sortIndices = function (array,indices) {
+    var i = array.length,
+    ret = zeros(array.length);
+
+    while (i--) {
+        ret[i-1] = array[indices[i-1]];
+    }
+    return(ret);
+}
+
+con2hex = function(contrast) {
+	con = Math.round(contrast*255);
+	conS = con.toString(16);
+	hex = '#' + conS + conS + conS;
+	return(hex);
+}
