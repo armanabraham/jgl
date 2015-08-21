@@ -9,3 +9,5 @@ cohcon/.psiturk_history
 *.csv
 
 *.log
+
+*.csv

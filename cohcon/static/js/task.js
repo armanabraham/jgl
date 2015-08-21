@@ -9,8 +9,18 @@ function cohcon() {
 	var instructionPages = [ // add as a list as many pages as you like
 		"instructions/instruct-1.html",
 		"instructions/instruct-2.html",
+		"instructions/instruct-3.html",
+		"instructions/instruct-4.html",
+		"instructions/instruct-4-5.html",
+		"instructions/instruct-5.html",
 		"instructions/instruct-ready.html"
 	];
+
+	var conPages = ["instructions/instruct-con.html"];
+	var motPages = ["instructions/instruct-mot.html"];
+
+	var pracTrials = 3;
+	var fullTrials = 3;
 
 	window.task = [];
 	task[0] = [];
@@ -19,73 +29,172 @@ function cohcon() {
 
 	task[0][1] = initInstructions(instructionPages);
 
-	task[0][2] = {};
-	task[0][2].waitForBacktick = 0;
-	task[0][2].segmin = [0.5,0.025,0.5,3];
-	task[0][2].segmax = [0.5,0.2,0.5,3];
-	task[0][2].numTrials = 5;
-	task[0][2].parameter = {};
-	task[0][2].parameter.practice = 1;
-	task[0][2].parameter.conP = 0.6;
-	task[0][2].parameter.conInc = [0.1];
-	task[0][2].parameter.conSide = [1, 2];
-	task[0][2].parameter.cohP = [0.1];
-	task[0][2].parameter.cohInc = [0.3];
-	task[0][2].parameter.cohSide = [1, 2];
-	task[0][2].parameter.dir = [-1,1];
-	task[0][2].parameter.task = 1;
-	task[0][2].usingScreen = 1;
-	task[0][2].getResponse = [0,0,0,1];
-	task[0][2].html = "canvas.html";
+	var order = [];
+	if (randomElement([true,false])) {
+		order = [2,3,4,5];
+	} else {
+		order = [4,5,2,3];
+	}
+	task[0][2] = {}; task[0][3] = {};
+	task[0][4] = {}; task[0][5] = {};
 
-	task[0][3] = initSurvey();
-	task[0][3].html = "preExp.html";
+	// Practice Run for Motion
+	task[0][order[0]] = initInstructions(motPages);
 
-	task[0][4] = {};
-	task[0][4].segmin = [0.5,0.025,0.5,2];
-	task[0][4].segmax = [0.5,0.2,0.5,2];
-	task[0][4].numTrials = 100;
-	task[0][4].parameter = {};
-	task[0][4].parameter.practice = 0;
-	task[0][4].parameter.practice = 1;
-	task[0][4].parameter.conP = 0.6;
-	task[0][4].parameter.conInc = [0.1];
-	task[0][4].parameter.conSide = [1, 2];
-	task[0][4].parameter.dir = [-1,1];
-	task[0][4].parameter.cohP = [0.1];
-	task[0][4].parameter.cohInc = [0.3];
-	task[0][4].parameter.cohSide = [1, 2];
-	task[0][4].parameter.task = 1;
-	task[0][4].usingScreen = 1;
-	task[0][4].getResponse = [0,0,0,1];
-	task[0][4].html = "canvas.html";
+	task[0][order[1]] = {};
+	task[0][order[1]].waitForBacktick = 0;
+	task[0][order[1]].segmin = [0.5,0.2,0.5,0,4];
+	task[0][order[1]].segmax = [0.5,0.2,0.5,0,4];
+	task[0][order[1]].numTrials = pracTrials;
+	task[0][order[1]].parameter = {};
+	task[0][order[1]].parameter.practice = 1;
+	task[0][order[1]].parameter.conP = 0.6;
+	task[0][order[1]].parameter.conInc = [0.1];
+	task[0][order[1]].parameter.conSide = [1, 2];
+	task[0][order[1]].parameter.cohP = [0.1];
+	task[0][order[1]].parameter.cohInc = [0.3];
+	task[0][order[1]].parameter.cohSide = [1, 2];
+	task[0][order[1]].parameter.dir = [-1,1];
+	task[0][order[1]].parameter.task = 1;
+	task[0][order[1]].parameter.crit = 0;
+	task[0][order[1]].random = 1;
+	task[0][order[1]].usingScreen = 1;
+	task[0][order[1]].getResponse = [0,0,0,0,1];
+	task[0][order[1]].html = "canvas.html";
 
-	task[0][5] = initSurvey();
-	task[0][5].html = "postquestionnaire-1.html";
+	// Practice Run for Contrast
+	task[0][order[2]] = initInstructions(conPages);
+
+	task[0][order[3]] = {};
+	task[0][order[3]].waitForBacktick = 0;
+	task[0][order[3]].segmin = [0.5,0.2,0.5,0,4];
+	task[0][order[3]].segmax = [0.5,0.2,0.5,0,4];
+	task[0][order[3]].numTrials = pracTrials;
+	task[0][order[3]].parameter = {};
+	task[0][order[3]].parameter.practice = 1;
+	task[0][order[3]].parameter.conP = 0.6;
+	task[0][order[3]].parameter.conInc = [0.1];
+	task[0][order[3]].parameter.conSide = [1, 2];
+	task[0][order[3]].parameter.cohP = [0.1];
+	task[0][order[3]].parameter.cohInc = [0.3];
+	task[0][order[3]].parameter.cohSide = [1, 2];
+	task[0][order[3]].parameter.dir = [-1,1];
+	task[0][order[3]].parameter.task = 2;
+	task[0][order[3]].parameter.crit = 0;
+	task[0][order[3]].random = 1;
+	task[0][order[3]].usingScreen = 1;
+	task[0][order[3]].getResponse = [0,0,0,0,1];
+	task[0][order[3]].html = "canvas.html";
+
+	// Full run for XXX
+	var fullOrder = [];
+	if (randomElement([true,false])) {
+		fullOrder = [1,2]; // coherence first
+	} else {
+		fullOrder = [2,1]; // contrast first
+	}
 
 	task[0][6] = initSurvey();
-	task[0][6].html = "postquestionnaire-2.html";
+	task[0][6].html = "preExp.html";
+
+	if (fullOrder[0]==1) {task[0][7] = initInstructions(motPages);} else {task[0][7] = initInstructions(conPages);}
+
+	task[0][8] = {};
+	task[0][8].segmin = [0.5,0.025,0.5,0,2];
+	task[0][8].segmax = [0.5,0.2,0.5,0,2];
+	task[0][8].numTrials = fullTrials;
+	task[0][8].parameter = {};
+	task[0][8].parameter.practice = 0;
+	task[0][8].parameter.practice = 1;
+	task[0][8].parameter.conP = 0.6;
+	task[0][8].parameter.conInc = [0.1];
+	task[0][8].parameter.conSide = [1, 2];
+	task[0][8].parameter.dir = [-1,1];
+	task[0][8].parameter.cohP = [0.1];
+	task[0][8].parameter.cohInc = [0.3];
+	task[0][8].parameter.cohSide = [1, 2];
+	task[0][8].parameter.crit = 0;
+	task[0][8].parameter.task = fullOrder[0];
+	task[0][8].random = 1;
+	task[0][8].usingScreen = 1;
+	task[0][8].getResponse = [0,0,0,0,1];
+	task[0][8].html = "canvas.html";
+
+	//CRITICAL TRIAL
+	task[0][9] = {};
+	task[0][9].segmin = [0.5,0.025,0.5,3,8];
+	task[0][9].segmax = [0.5,0.3,0.5,3,8];
+	task[0][9].numTrials = 1;
+	task[0][9].parameter = {};
+	task[0][9].parameter.practice = 0;
+	task[0][9].parameter.practice = 1;
+	task[0][9].parameter.conP = 0.6;
+	task[0][9].parameter.conInc = [0.1];
+	task[0][9].parameter.conSide = [1, 2];
+	task[0][9].parameter.dir = [-1,1];
+	task[0][9].parameter.cohP = [0.1];
+	task[0][9].parameter.cohInc = [0.3];
+	task[0][9].parameter.cohSide = [1, 2];
+	task[0][9].parameter.task = fullOrder[1];
+	task[0][9].parameter.crit = 1;
+	task[0][9].usingScreen = 1;
+	task[0][9].getResponse = [0,0,0,0,1];
+	task[0][9].html = "canvas.html";
+
+	if (fullOrder[1]==1) {task[0][10] = initInstructions(motPages);} else {task[0][10] = initInstructions(conPages);}
+
+	//FULL RUN
+	task[0][11] = {};
+	task[0][11].segmin = [0.5,0.025,0.5,0,2];
+	task[0][11].segmax = [0.5,0.2,0.5,0,2];
+	task[0][11].numTrials = fullTrials;
+	task[0][11].parameter = {};
+	task[0][11].parameter.practice = 0;
+	task[0][11].parameter.practice = 1;
+	task[0][11].parameter.conP = 0.6;
+	task[0][11].parameter.conInc = [0.1];
+	task[0][11].parameter.conSide = [1, 2];
+	task[0][11].parameter.dir = [-1,1];
+	task[0][11].parameter.cohP = [0.1];
+	task[0][11].parameter.cohInc = [0.3];
+	task[0][11].parameter.cohSide = [1, 2];
+	task[0][11].parameter.task = fullOrder[1];
+	task[0][11].parameter.crit = 0;
+	task[0][11].random = 1;
+	task[0][11].usingScreen = 1;
+	task[0][11].getResponse = [0,0,0,0,1];
+	task[0][11].html = "canvas.html";
+
+	task[0][12] = initSurvey();
+	task[0][12].html = "postquestionnaire-2.html";
 
 
-	task[0][2] = initTask(task[0][2], startSegmentCallback, screenUpdateCallback, getResponseCallback, startTrialCallback);
-	task[0][4] = initTask(task[0][4], startSegmentCallback, screenUpdateCallback, getResponseCallback, startTrialCallback);
+	task[0][3] = initTask(task[0][3], startSegmentCallback, screenUpdateCallback, getResponseCallback, startTrialCallback);
+	task[0][5] = initTask(task[0][5], startSegmentCallback, screenUpdateCallback, getResponseCallback, startTrialCallback);
+	task[0][8] = initTask(task[0][8], startSegmentCallback, screenUpdateCallback, getResponseCallback, startTrialCallback);
+	task[0][9] = initTask(task[0][9], startSegmentCallback, screenUpdateCallback, getResponseCallback, startTrialCallback);
+	task[0][11] = initTask(task[0][11], startSegmentCallback, screenUpdateCallback, getResponseCallback, startTrialCallback);
 
 	window.stimulus = {};
 	initStimulus('stimulus');
 
-
 	myInitStimulus(task);
+
+	var critTasks = ['Motion','Contrast'];
+	stimulus.critTask = critTasks[fullOrder[1]-1];
 
 	initTurk();
 
 	jglData.responses = [];
 	jglData.correct = [];
+	jglData.postSurvey = {};
 
 	startPhase(task[0]);
-
 }
 
 var startTrialCallback = function(task, myscreen) {
+	console.log(task.thistrial.conSide);
+	console.log(task.thistrial.cohSide);
 	if (task.trialnum >= stimulus.critTrial) {
 		task.thistrial.task = 2;
 	}
@@ -172,6 +281,13 @@ var screenUpdateCallback = function(task, myscreen) {
 			upMask();
 			upFix('#000000');
 			break;
+		case stimulus.seg.crit:
+			if (task.thistrial.crit) {
+				jglTextSet('Arial',1,'#000000',0,0);
+				jglTextDraw('Respond about ' + stimulus.critTask,-5,-3);
+				jglTextDraw('You have Extra Time',-5,3);
+			}
+			break;
 		case stimulus.seg.resp:
 			if (stimulus.gotResp==0) {
 				upExamples(task);
@@ -192,10 +308,6 @@ var screenUpdateCallback = function(task, myscreen) {
 
 function upExamples(task) {
 	jglTextSet('Arial',1,'#000000',0,0);
-	if (task.trialnum == stimulus.critTrial) {
-		jglTextDraw('Respond about Contrast!!', -5, -5);
-		jglTextDraw('You have extra time.', -5, -4);
-	}
 	if (task.thistrial.task==2) {
 		// Contrast examples
 		for (var i=0;i<4;i++) {
@@ -312,7 +424,8 @@ function myInitStimulus(task) {
 	stimulus.seg.ITI = 0;
 	stimulus.seg.stim = 1;
 	stimulus.seg.ISI = 2;
-	stimulus.seg.resp = 3;
+	stimulus.seg.crit = 3;
+	stimulus.seg.resp = 4;
 
 	stimulus.low = {}; stimulus.med = {}; stimulus.high = {};
 	stimulus.low.contrast = 0.1;
@@ -392,11 +505,11 @@ function myInitStimulus(task) {
 
 	// example dots for contrast, static
 	stimulus.eDotsC = {};
-	stimulus.eDotsC.n = 25;
-	stimulus.eDotsC.minX = [-4, 2, -4, 2];
-	stimulus.eDotsC.maxX = [-2, 4, -2, 4];
-	stimulus.eDotsC.minY = [2, 2, -4, -4];
-	stimulus.eDotsC.maxY = [4, 4, -2, -2];
+	stimulus.eDotsC.n = 30;
+	stimulus.eDotsC.minX = [-3, 1, -3, 1];
+	stimulus.eDotsC.maxX = [-1, 3, -1, 3];
+	stimulus.eDotsC.minY = [2, 2, -5, -5];
+	stimulus.eDotsC.maxY = [5, 5, -2, -2];
 	stimulus.eDotsC.con = sortIndices(repmat([0,1],stimulus.eDotsC.n/2),randPerm(task,stimulus.eDotsC.n));
 	stimulus.eDotsC.colorW = [con2hex(1),con2hex(0.6),con2hex(0.6),con2hex(1)];
 	stimulus.eDotsC.colorB = [con2hex(0),con2hex(0.4),con2hex(0.4),con2hex(0)];
@@ -410,11 +523,11 @@ function myInitStimulus(task) {
 
 	// example dots for motion, two static, two moving
 	stimulus.eDotsM = {};
-	stimulus.eDotsM.n = 25;
-	stimulus.eDotsM.minX = [-4, 2, -4, 2];
-	stimulus.eDotsM.maxX = [-2, 4, -2, 4];
-	stimulus.eDotsM.minY = [2, 2, -4, -4];
-	stimulus.eDotsM.maxY = [4, 4, -2, -2];
+	stimulus.eDotsM.n = 30;
+	stimulus.eDotsM.minX = [-3, 1, -3, 1];
+	stimulus.eDotsM.maxX = [-1, 3, -1, 3];
+	stimulus.eDotsM.minY = [2, 2, -5, -5];
+	stimulus.eDotsM.maxY = [5, 5, -2, -2];
 	stimulus.eDotsM.dir = [-1,0,0,1];
 	stimulus.eDotsM.con = sortIndices(repmat([0,1],stimulus.eDotsM.n/2),randPerm(task,stimulus.eDotsM.n));
 	stimulus.eDotsM.x = []; stimulus.eDotsM.y = [];

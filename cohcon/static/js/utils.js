@@ -34,3 +34,12 @@ con2hex = function(contrast) {
 	hex = '#' + conS + conS + conS;
 	return(hex);
 }
+
+
+function randomInteger(n) {
+	return Math.floor(Math.random()*n);
+}
+
+function randomElement(array) {
+	return array[randomInteger(array.length)];
+}
