@@ -39,7 +39,8 @@ function clearIntAndTimeouts() {
 		}
 	}
 	if (window.drawInterval) {
-		clearInterval(window.drawInterval);
+		window.cancelAnimationFrame(window.drawInterval);
+		// clearInterval(window.drawInterval);
 		window.drawInterval = null;
 	}
 }
@@ -83,13 +84,21 @@ var startPhase = function(task) {
 			jglOpen(myscreen.ppi);
 		}
 		if (! window.drawInterval) {
-			window.drawInterval = setInterval(tickScreen, 17);
+			// window.drawInterval = setInterval(tickScreen, 17);
+			window.drawInterval = window.requestAnimationFrame(requestFrame);
 		}
 	}
 	writeTrace(1, task[tnum].phaseTrace);
 	initBlock(task[tnum]);
 	startBlock(task);
 }
+
+var requestFrame = function() {
+	tickScreen();
+
+	window.drawInterval = window.requestAnimationFrame(requestFrame);
+}
+
 
 /**
  * This function starts a block. First is checks to make sure there are blocks left, if
