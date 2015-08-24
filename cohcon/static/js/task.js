@@ -19,24 +19,50 @@ function cohcon() {
 	var conPages = ["instructions/instruct-con.html"];
 	var motPages = ["instructions/instruct-mot.html"];
 
-	var pracTrials = 3;
-	var fullTrials = 3;
+	var pracTrials = 1;
+	var fullTrials = 10;
+
+	var phases = {};
+	phases.s1 = 0;
+	phases.s2 = 1;
+	phases.i = 2;
+	phases.traini1 = 3;
+	phases.train1 = 4;
+	phases.traini2 = 5;
+	phases.train2 = 6;
+	phases.pe = 7;
+	phases.e1i = 8;
+	phases.e1 = 9;
+	phases.c = 10;
+	phases.e2i = 11;
+	phases.e2 = 12;
+	phases.post = 13;
+	var peds = {};
+	peds.con = 0.6;
+	peds.conInc = 0.025;
+	peds.conTInc = 0.1;
+	peds.coh = 0.2;
+	peds.cohInc = 0.05;
+	peds.cohTInc = 0.3;
 
 	window.task = [];
 	task[0] = [];
-	task[0][0] = initSurvey();
-	task[0][0].html = "survey.html";
+	task[0][phases.s1] = initSurvey();
+	task[0][phases.s1].html = "surveyDemo.html";
 
-	task[0][1] = initInstructions(instructionPages);
+	task[0][phases.s2] = initSurvey();
+	task[0][phases.s2].html = "surveyScreen.html";
+
+	task[0][phases.i] = initInstructions(instructionPages);
 
 	var order = [];
 	if (randomElement([true,false])) {
-		order = [2,3,4,5];
+		order = [phases.traini1, phases.train1, phases.traini2, phases.train2];
 	} else {
-		order = [4,5,2,3];
+		order = [phases.traini2, phases.train2, phases.traini1, phases.train1];
 	}
-	task[0][2] = {}; task[0][3] = {};
-	task[0][4] = {}; task[0][5] = {};
+	task[0][phases.traini1] = {}; task[0][phases.train1] = {};
+	task[0][phases.traini2] = {}; task[0][phases.train2] = {};
 
 	// Practice Run for Motion
 	task[0][order[0]] = initInstructions(motPages);
@@ -48,11 +74,11 @@ function cohcon() {
 	task[0][order[1]].numTrials = pracTrials;
 	task[0][order[1]].parameter = {};
 	task[0][order[1]].parameter.practice = 1;
-	task[0][order[1]].parameter.conP = 0.6;
-	task[0][order[1]].parameter.conInc = [0.1];
+	task[0][order[1]].parameter.conP = peds.con;
+	task[0][order[1]].parameter.conInc = peds.conTInc;
 	task[0][order[1]].parameter.conSide = [1, 2];
-	task[0][order[1]].parameter.cohP = [0.1];
-	task[0][order[1]].parameter.cohInc = [0.3];
+	task[0][order[1]].parameter.cohP = peds.coh;
+	task[0][order[1]].parameter.cohInc = peds.cohTInc;
 	task[0][order[1]].parameter.cohSide = [1, 2];
 	task[0][order[1]].parameter.dir = [-1,1];
 	task[0][order[1]].parameter.task = 1;
@@ -72,11 +98,11 @@ function cohcon() {
 	task[0][order[3]].numTrials = pracTrials;
 	task[0][order[3]].parameter = {};
 	task[0][order[3]].parameter.practice = 1;
-	task[0][order[3]].parameter.conP = 0.6;
-	task[0][order[3]].parameter.conInc = [0.1];
+	task[0][order[3]].parameter.conP = peds.con;
+	task[0][order[3]].parameter.conInc = peds.conTInc;
 	task[0][order[3]].parameter.conSide = [1, 2];
-	task[0][order[3]].parameter.cohP = [0.1];
-	task[0][order[3]].parameter.cohInc = [0.3];
+	task[0][order[3]].parameter.cohP = peds.coh;
+	task[0][order[3]].parameter.cohInc = peds.cohTInc;
 	task[0][order[3]].parameter.cohSide = [1, 2];
 	task[0][order[3]].parameter.dir = [-1,1];
 	task[0][order[3]].parameter.task = 2;
@@ -94,86 +120,83 @@ function cohcon() {
 		fullOrder = [2,1]; // contrast first
 	}
 
-	task[0][6] = initSurvey();
-	task[0][6].html = "preExp.html";
+	task[0][phases.pe] = initSurvey();
+	task[0][phases.pe].html = "preExp.html";
 
-	if (fullOrder[0]==1) {task[0][7] = initInstructions(motPages);} else {task[0][7] = initInstructions(conPages);}
+	if (fullOrder[0]==1) {task[0][phases.e1i] = initInstructions(motPages);} else {task[0][phases.e1i] = initInstructions(conPages);}
 
-	task[0][8] = {};
-	task[0][8].segmin = [0.5,0.025,0.5,0,2];
-	task[0][8].segmax = [0.5,0.2,0.5,0,2];
-	task[0][8].numTrials = fullTrials;
-	task[0][8].parameter = {};
-	task[0][8].parameter.practice = 0;
-	task[0][8].parameter.practice = 1;
-	task[0][8].parameter.conP = 0.6;
-	task[0][8].parameter.conInc = [0.1];
-	task[0][8].parameter.conSide = [1, 2];
-	task[0][8].parameter.dir = [-1,1];
-	task[0][8].parameter.cohP = [0.1];
-	task[0][8].parameter.cohInc = [0.3];
-	task[0][8].parameter.cohSide = [1, 2];
-	task[0][8].parameter.crit = 0;
-	task[0][8].parameter.task = fullOrder[0];
-	task[0][8].random = 1;
-	task[0][8].usingScreen = 1;
-	task[0][8].getResponse = [0,0,0,0,1];
-	task[0][8].html = "canvas.html";
+	task[0][phases.e1] = {};
+	task[0][phases.e1].segmin = [0.5,0.01,0.5,0,2];
+	task[0][phases.e1].segmax = [0.5,0.2,0.5,0,2];
+	task[0][phases.e1].numTrials = fullTrials;
+	task[0][phases.e1].parameter = {};
+	task[0][phases.e1].parameter.practice = 0;
+	task[0][phases.e1].parameter.conP = peds.con;
+	task[0][phases.e1].parameter.conInc = peds.conInc;
+	task[0][phases.e1].parameter.conSide = [1, 2];
+	task[0][phases.e1].parameter.dir = [-1,1];
+	task[0][phases.e1].parameter.cohP = peds.coh;
+	task[0][phases.e1].parameter.cohInc = peds.cohInc;
+	task[0][phases.e1].parameter.cohSide = [1, 2];
+	task[0][phases.e1].parameter.crit = 0;
+	task[0][phases.e1].parameter.task = fullOrder[0];
+	task[0][phases.e1].random = 1;
+	task[0][phases.e1].usingScreen = 1;
+	task[0][phases.e1].getResponse = [0,0,0,0,1];
+	task[0][phases.e1].html = "canvas.html";
 
 	//CRITICAL TRIAL
-	task[0][9] = {};
-	task[0][9].segmin = [0.5,0.025,0.5,3,8];
-	task[0][9].segmax = [0.5,0.3,0.5,3,8];
-	task[0][9].numTrials = 1;
-	task[0][9].parameter = {};
-	task[0][9].parameter.practice = 0;
-	task[0][9].parameter.practice = 1;
-	task[0][9].parameter.conP = 0.6;
-	task[0][9].parameter.conInc = [0.1];
-	task[0][9].parameter.conSide = [1, 2];
-	task[0][9].parameter.dir = [-1,1];
-	task[0][9].parameter.cohP = [0.1];
-	task[0][9].parameter.cohInc = [0.3];
-	task[0][9].parameter.cohSide = [1, 2];
-	task[0][9].parameter.task = fullOrder[1];
-	task[0][9].parameter.crit = 1;
-	task[0][9].usingScreen = 1;
-	task[0][9].getResponse = [0,0,0,0,1];
-	task[0][9].html = "canvas.html";
+	task[0][phases.c] = {};
+	task[0][phases.c].segmin = [0.5,0.01,0.5,3,8];
+	task[0][phases.c].segmax = [0.5,0.3,0.5,3,8];
+	task[0][phases.c].numTrials = 1;
+	task[0][phases.c].parameter = {};
+	task[0][phases.c].parameter.practice = 0;
+	task[0][phases.c].parameter.conP = peds.con;
+	task[0][phases.c].parameter.conInc = peds.conInc;
+	task[0][phases.c].parameter.conSide = [1, 2];
+	task[0][phases.c].parameter.dir = [-1,1];
+	task[0][phases.c].parameter.cohP = peds.coh;
+	task[0][phases.c].parameter.cohInc = peds.cohInc;
+	task[0][phases.c].parameter.cohSide = [1, 2];
+	task[0][phases.c].parameter.task = fullOrder[1];
+	task[0][phases.c].parameter.crit = 1;
+	task[0][phases.c].usingScreen = 1;
+	task[0][phases.c].getResponse = [0,0,0,0,1];
+	task[0][phases.c].html = "canvas.html";
 
-	if (fullOrder[1]==1) {task[0][10] = initInstructions(motPages);} else {task[0][10] = initInstructions(conPages);}
+	if (fullOrder[1]==1) {task[0][phases.e2i] = initInstructions(motPages);} else {task[0][phases.e2i] = initInstructions(conPages);}
 
 	//FULL RUN
-	task[0][11] = {};
-	task[0][11].segmin = [0.5,0.025,0.5,0,2];
-	task[0][11].segmax = [0.5,0.2,0.5,0,2];
-	task[0][11].numTrials = fullTrials;
-	task[0][11].parameter = {};
-	task[0][11].parameter.practice = 0;
-	task[0][11].parameter.practice = 1;
-	task[0][11].parameter.conP = 0.6;
-	task[0][11].parameter.conInc = [0.1];
-	task[0][11].parameter.conSide = [1, 2];
-	task[0][11].parameter.dir = [-1,1];
-	task[0][11].parameter.cohP = [0.1];
-	task[0][11].parameter.cohInc = [0.3];
-	task[0][11].parameter.cohSide = [1, 2];
-	task[0][11].parameter.task = fullOrder[1];
-	task[0][11].parameter.crit = 0;
-	task[0][11].random = 1;
-	task[0][11].usingScreen = 1;
-	task[0][11].getResponse = [0,0,0,0,1];
-	task[0][11].html = "canvas.html";
+	task[0][phases.e2] = {};
+	task[0][phases.e2].segmin = [0.5,0.01,0.5,0,2];
+	task[0][phases.e2].segmax = [0.5,0.2,0.5,0,2];
+	task[0][phases.e2].numTrials = fullTrials;
+	task[0][phases.e2].parameter = {};
+	task[0][phases.e2].parameter.practice = 0;
+	task[0][phases.e2].parameter.conP  = peds.con;
+	task[0][phases.e2].parameter.conInc = peds.conInc;
+	task[0][phases.e2].parameter.conSide = [1, 2];
+	task[0][phases.e2].parameter.dir = [-1,1];
+	task[0][phases.e2].parameter.cohP = peds.coh;
+	task[0][phases.e2].parameter.cohInc = peds.cohInc;
+	task[0][phases.e2].parameter.cohSide = [1, 2];
+	task[0][phases.e2].parameter.task = fullOrder[1];
+	task[0][phases.e2].parameter.crit = 0;
+	task[0][phases.e2].random = 1;
+	task[0][phases.e2].usingScreen = 1;
+	task[0][phases.e2].getResponse = [0,0,0,0,1];
+	task[0][phases.e2].html = "canvas.html";
 
-	task[0][12] = initSurvey();
-	task[0][12].html = "postquestionnaire-2.html";
+	task[0][phases.post] = initSurvey();
+	task[0][phases.post].html = "postquestionnaire-2.html";
 
 
-	task[0][3] = initTask(task[0][3], startSegmentCallback, screenUpdateCallback, getResponseCallback, startTrialCallback);
-	task[0][5] = initTask(task[0][5], startSegmentCallback, screenUpdateCallback, getResponseCallback, startTrialCallback);
-	task[0][8] = initTask(task[0][8], startSegmentCallback, screenUpdateCallback, getResponseCallback, startTrialCallback);
-	task[0][9] = initTask(task[0][9], startSegmentCallback, screenUpdateCallback, getResponseCallback, startTrialCallback);
-	task[0][11] = initTask(task[0][11], startSegmentCallback, screenUpdateCallback, getResponseCallback, startTrialCallback);
+	task[0][phases.train1] = initTask(task[0][phases.train1], startSegmentCallback, screenUpdateCallback, getResponseCallback, startTrialCallback);
+	task[0][phases.train2] = initTask(task[0][phases.train2], startSegmentCallback, screenUpdateCallback, getResponseCallback, startTrialCallback);
+	task[0][phases.e1] = initTask(task[0][phases.e1], startSegmentCallback, screenUpdateCallback, getResponseCallback, startTrialCallback);
+	task[0][phases.c] = initTask(task[0][phases.c], startSegmentCallback, screenUpdateCallback, getResponseCallback, startTrialCallback);
+	task[0][phases.e2] = initTask(task[0][phases.e2], startSegmentCallback, screenUpdateCallback, getResponseCallback, startTrialCallback);
 
 	window.stimulus = {};
 	initStimulus('stimulus');
@@ -195,10 +218,7 @@ function cohcon() {
 var startTrialCallback = function(task, myscreen) {
 	console.log(task.thistrial.conSide);
 	console.log(task.thistrial.cohSide);
-	if (task.trialnum >= stimulus.critTrial) {
-		task.thistrial.task = 2;
-	}
-	if(task.trialnum == stimulus.critTrial) {
+	if(task.thistrial.crit) {
 		task.thistrial.seglen[stimulus.seg.resp] = 10;
 	}
 	jglData.responses.push(0);
@@ -290,7 +310,10 @@ var screenUpdateCallback = function(task, myscreen) {
 			break;
 		case stimulus.seg.resp:
 			if (stimulus.gotResp==0) {
-				upExamples(task);
+				if (task.thistrial.practice) {
+					upNowRespondText();
+				}
+				// upExamples(task);
 				upFix('#ffffff');
 			} else if (stimulus.gotResp==1) {
 				upFix('#00ff00');
@@ -304,6 +327,11 @@ var screenUpdateCallback = function(task, myscreen) {
 
 	return [task, myscreen];
 
+}
+
+function upNowRespondText() {	
+	jglTextSet('Arial',1,'#000000',0,0);
+	jglTextDraw('Respond Now',-3,-2.75);
 }
 
 function upExamples(task) {
